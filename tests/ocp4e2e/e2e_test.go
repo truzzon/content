@@ -1,6 +1,7 @@
 package ocp4e2e
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -62,6 +63,7 @@ func TestE2e(t *testing.T) {
 	})
 
 	if numberOfRemediations > 0 || len(manualRemediations) > 0 {
+
 		if len(manualRemediations) > 0 {
 			t.Run("Apply manual remediations", func(t *testing.T) {
 				ctx.applyManualRemediations(t, manualRemediations)
@@ -74,12 +76,51 @@ func TestE2e(t *testing.T) {
 			ctx.waitForMachinePoolUpdate(t, "worker")
 		})
 
-		t.Run("Run second compliance scan", func(t *testing.T) {
-			ctx.doRescan(t, suite)
-			ctx.waitForComplianceSuite(t, suite)
-			numberOfFailuresEnd = ctx.getFailuresForSuite(t, suite)
-			numberOfCheckResultsEnd, _ = ctx.verifyCheckResultsForSuite(t, suite, true)
+		// empty cleanup function that will be a no-op if the profile setup is skipped.
+		var cleanup func() = func() {}
+		t.Run("Configure test IdP", func(t *testing.T) {
+			if ctx.Profile == "moderate" {
+				t.Skip("Skipping IdP setup as this doesn't work in this profile.")
+			}
+			cleanup = ctx.ensureIdP(t)
 		})
+
+		// These will get cleaned up at the end of the test
+		defer cleanup()
+		var scanN int
+
+		for scanN = 2; scanN < 5; scanN++ {
+			var needsMoreRemediations bool
+			t.Run(fmt.Sprintf("Check for remediations with dependencies before scan %d", scanN), func(t *testing.T) {
+				needsMoreRemediations = ctx.suiteHasRemediationsWithUnmetDependencies(t, suite)
+			})
+
+			t.Run(fmt.Sprintf("Run compliance scan #%d", scanN), func(t *testing.T) {
+				ctx.doRescan(t, suite)
+				ctx.waitForComplianceSuite(t, suite)
+
+				// We only actually verify results in the final scan
+				if !needsMoreRemediations {
+					numberOfFailuresEnd = ctx.getFailuresForSuite(t, suite)
+					numberOfCheckResultsEnd, _ = ctx.verifyCheckResultsForSuite(t, suite, true)
+				}
+			})
+
+			if !needsMoreRemediations {
+				break
+			}
+
+			t.Run(fmt.Sprintf("Scan %d: Wait for Remediations to apply", scanN), func(t *testing.T) {
+				// Lets wait for the MachineConfigs to start applying
+				time.Sleep(30 * time.Second)
+				ctx.waitForMachinePoolUpdate(t, "master")
+				ctx.waitForMachinePoolUpdate(t, "worker")
+			})
+		}
+
+		if scanN == 4 {
+			t.Fatalf("Reached maximum number of re-scans. There might be a remediation dependency issue.")
+		}
 
 		t.Run("We should have the same number of check results in each scan", func(t *testing.T) {
 			if numberOfCheckResultsInit != numberOfCheckResultsEnd {

@@ -75,9 +75,7 @@ selections:
   # 1.2.20 Ensure that the --secure-port argument is not set to 0
     - api_server_bind_address
   # 1.2.21 Ensure that the --profiling argument is set to false
-    # (jhrozek): This rule should temporarily be commented out as OCP diverges from CIS
-    #            and we need to improve our reply to this control
-    # - api_server_profiling
+    - api_server_profiling_protected_by_rbac
   # 1.2.22 Ensure that the --audit-log-path argument is set
     - api_server_audit_log_path
     - openshift_api_server_audit_log_path
@@ -154,12 +152,20 @@ selections:
   ###
   #### 3.1 Authentication and Authorization
   # 3.1.1 Client certificate authentication should not be used for users
+    - idp_is_configured
   #### 3.2 Logging
   # 3.2.1 Ensure that a minimal audit policy is created
   # 3.2.2 Ensure that the audit policy covers key security concerns
+    - audit_profile_set
 
   ### 4 Worker Nodes
   ###
+  #### 4.1 Worker node configuration
+  # 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Automated)
+    - file_permissions_proxy_kubeconfig
+  # 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
+    - file_owner_proxy_kubeconfig
+    - file_groupowner_proxy_kubeconfig
   #### 4.2 Kubelet
   # 4.2.4 Ensure that the --read-only-port argument is set to 0
     - kubelet_disable_readonly_port
@@ -168,7 +174,7 @@ selections:
     # Like kubelet_disable_readonly_port but check for .apiServerArguments["kubelet-client-certificate"]
     - kubelet_configure_tls_key
     # Like kubelet_disable_readonly_port but check for .apiServerArguments["kubelet-client-key"]
-  # 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers
+
 
   ### 5 Policies
   ###
