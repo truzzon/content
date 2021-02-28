@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: fedora,ol7,ol8,rhel7,rhel8
+prodtype: fedora,ol7,ol8,rhel7,rhel8,sle12,sle15
 
 title: 'Disable At Service (atd)'
 
@@ -25,6 +25,10 @@ identifiers:
     cce@rhel8: CCE-80871-7
 
 references:
+    cis@rhel7: 5.1.8
+    cis@rhel8: 5.1.8
+    cis@sle12: 5.1.8
+    cis@sle15: 5.1.8
     disa: CCI-000381
     nist: CM-7(a),CM-7(b),CM-6(a)
     nist-csf: PR.IP-1,PR.PT-3
