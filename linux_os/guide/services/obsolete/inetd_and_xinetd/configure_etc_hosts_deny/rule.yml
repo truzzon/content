@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: ol7,rhel7,sle15
+prodtype: ol7,rhel7,sle12,sle15
 
 title: 'Ensure /etc/hosts.deny is configured'
 
@@ -25,6 +25,7 @@ identifiers:
 
 references:
     cis@rhel7: 3.4.3
+    cis@sle12: 3.4.3
 
 ocil_clause: 'access to services supporting TCP wrappers is not properly configured'
 
