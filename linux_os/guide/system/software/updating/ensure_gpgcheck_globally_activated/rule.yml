@@ -34,9 +34,11 @@ identifiers:
     cce@rhel7: CCE-26989-4
     cce@rhel8: CCE-80790-9
     cce@sle12: CCE-83068-7
+    cce@sle15: CCE-83290-7
 
 references:
     stigid@ol7: OL07-00-020050
+    cis@rhel7: 1.2.2
     cis@rhel8: 1.2.4
     cjis: 5.10.4.1
     cui: 3.4.8
@@ -56,6 +58,7 @@ references:
     cis-csc: 11,2,3,9
     anssi: BP28(R15)
     stigid@sle12: SLES-12-010550
+    stigid@sle15: SLES-15-010430
     stigid@rhel8: RHEL-08-010370
 
 ocil_clause: 'GPG checking is not enabled'
@@ -69,7 +72,7 @@ ocil: |-
     <tt>gpgcheck</tt> line or a setting of <tt>0</tt> indicates that it is
     disabled.
 
-{{% if product == 'sle12' %}}
+{{% if product in ['sle12', 'sle15'] %}}
 platform: zypper
 {{% else %}}
 platform: yum

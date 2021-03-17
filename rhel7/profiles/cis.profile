@@ -591,7 +591,6 @@ selections:
 
 
     ## 4.3 Ensure logrotate is configured (Not Scored)
-    - ensure_logrotate_activated
 
     # 5 Access, Authentication and Authorization
     ## 5.1 Configure cron
@@ -705,7 +704,8 @@ selections:
 
     ### 5.2.12 Ensure SSH Idle Timeout Interval is configured (Scored)
     - sshd_set_idle_timeout
-    - sshd_set_keepalive
+    - var_sshd_set_keepalive=0
+    - sshd_set_keepalive_0
 
     ### 5.2.13 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
     - sshd_login_grace_time_value=60
